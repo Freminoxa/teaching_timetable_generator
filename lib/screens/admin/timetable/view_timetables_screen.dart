@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../theme/must_theme.dart';
-import '../../../config/app_constants.dart';
 import 'generate_timetable_screen.dart';
 import 'view_timetable_screen.dart';
 

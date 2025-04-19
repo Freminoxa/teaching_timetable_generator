@@ -256,7 +256,7 @@ class _LecturerFormState extends State<LecturerForm> {
                   if (!_emailController.text.contains('@') || 
                       _emailController.text.isEmpty) {
                     _emailController.text = 
-                        value.toLowerCase().replaceAll(' ', '.').toLowerCase() + '@must.ac.ke';
+                        '${value.toLowerCase().replaceAll(' ', '.').toLowerCase()}@must.ac.ke';
                   }
                 },
               ),

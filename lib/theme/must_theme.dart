@@ -166,8 +166,8 @@ class MustTheme {
         surfaceTintColor: Colors.white,
       ),
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith<Color>((states) {
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+          if (states.contains(WidgetState.selected)) {
             return primaryGreen;
           }
           return Colors.transparent;
@@ -177,22 +177,22 @@ class MustTheme {
         ),
       ),
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith<Color>((states) {
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+          if (states.contains(WidgetState.selected)) {
             return primaryGreen;
           }
           return Colors.grey.shade600;
         }),
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith<Color>((states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
+          if (states.contains(WidgetState.selected)) {
             return primaryGreen;
           }
           return Colors.grey.shade400;
         }),
-        trackColor: MaterialStateProperty.resolveWith<Color>((states) {
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith<Color>((states) {
+          if (states.contains(WidgetState.selected)) {
             return primaryGreen.withOpacity(0.5);
           }
           return Colors.grey.shade300;

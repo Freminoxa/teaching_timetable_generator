@@ -300,8 +300,8 @@ class _ManageVenuesScreenState extends State<ManageVenuesScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddVenueDialog,
-        child: const Icon(Icons.add),
         tooltip: 'Add New Venue',
+        child: const Icon(Icons.add),
       ),
       body: Column(
         children: [

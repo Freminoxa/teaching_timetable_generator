@@ -1,11 +1,12 @@
+//lib/screens/lecturer/lecturer_dashboard.dart
 import 'package:flutter/material.dart';
 import '../../theme/must_theme.dart';
 import '../../config/app_constants.dart';
 import '../../models/user.dart';
 import '../../models/timetable_session.dart';
+import '../../services/data_service.dart';
 import '../auth/login_screen.dart';
 import 'lecturer_timetable_screen.dart';
-
 class LecturerDashboard extends StatefulWidget {
   final User user;
 
@@ -14,8 +15,8 @@ class LecturerDashboard extends StatefulWidget {
   @override
   State<LecturerDashboard> createState() => _LecturerDashboardState();
 }
-
 class _LecturerDashboardState extends State<LecturerDashboard> {
+  final DataService _dataService = DataService();
   bool _isLoading = true;
   List<TimetableSession> _todaySessions = [];
   List<TimetableSession> _upcomingSessions = [];
@@ -25,113 +26,63 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadLecturerTimetable();
   }
-
-  Future<void> _loadData() async {
-    // Simulate loading delay
-    await Future.delayed(const Duration(seconds: 1));
-
-    // Get today's day name
-    final now = DateTime.now();
-    final today = _getDayName(now.weekday);
-    
-    // Generate sample timetable data for the lecturer
-    _allSessions = _generateSampleTimetable();
-    _todaySessions = _allSessions[today] ?? [];
-    
-    // Get upcoming sessions (next day with classes)
-    String nextDay = _getNextDayWithClasses(today);
-    _upcomingSessions = _allSessions[nextDay] ?? [];
-    
-    // Get assigned units
-    _assignedUnits = _extractUniqueUnits(_allSessions);
-
+  Future<void> _loadLecturerTimetable() async {
     setState(() {
-      _isLoading = false;
+      _isLoading = true;
     });
-  }
 
-  // Generate a sample timetable for the lecturer
-  Map<String, List<TimetableSession>> _generateSampleTimetable() {
-    Map<String, List<TimetableSession>> timetable = {};
-
-    // Ensure lecturer has assigned units
-    List<String> units = widget.user.units ?? [
-      'CIT 3150', 
-      'CIT 3154', 
-      'CCS 3251'
-    ];
-
-    // Map of unit codes to names
-    Map<String, String> unitNames = {
-      'CIT 3150': 'Web Development',
-      'CIT 3154': 'Database Systems',
-      'CIT 3153': 'Object-Oriented Programming',
-      'CCU 3150': 'Communication Skills',
-      'CIT 3152': 'Operating Systems',
-      'CCS 3251': 'Artificial Intelligence',
-      'CCS 3255': 'Machine Learning',
-      'CDS 3253': 'Data Mining',
-    };
-
-    // Sample venues
-    List<String> venues = ['TB 08', 'TB 05', 'ECB 05', 'TB 16', 'TB 06'];
-
-    // Sample student groups
-    List<String> programs = [
-      'BCS Y1S1', 
-      'BCS Y2S1', 
-      'BCS Y3S1', 
-      'BDS Y1S1', 
-      'BDS Y2S1'
-    ];
-
-    // Create distributed sessions throughout the week
-    for (int i = 0; i < units.length; i++) {
-      // Get unit info
-      String unitCode = units[i];
-      String unitName = unitNames[unitCode] ?? 'Unknown Unit';
+    try {
+      // Fetch lecturer's timetable sessions
+      final sessions = await _dataService.getLecturerTimetable(widget.user.name);
       
-      // Assign to a day (distribute evenly)
-      String day = AppConstants.daysOfWeek[i % AppConstants.daysOfWeek.length];
+      // Organize sessions by day
+      _allSessions = _organizeTimetableSessions(sessions);
       
-      // Determine if it's a lab session
-      bool isLab = i % 2 == 0;
+      // Get today's sessions
+      final now = DateTime.now();
+      final today = _getDayName(now.weekday);
+      _todaySessions = _allSessions[today] ?? [];
       
-      // Assign a time slot
-      String timeSlot = isLab 
-          ? '2PM-5PM'  // Labs in afternoon
-          : (i % 2 == 0 ? '8AM-11AM' : '11AM-2PM'); // Morning/midday for regular classes
-          
-      // Assign venue and program
-      String venue = venues[i % venues.length];
-      String program = programs[i % programs.length];
+      // Get upcoming sessions
+      String nextDay = _getNextDayWithClasses(today);
+      _upcomingSessions = _allSessions[nextDay] ?? [];
       
-      // Create the session
-      TimetableSession session = TimetableSession(
-        day: day,
-        timeSlot: timeSlot,
-        unitCode: unitCode,
-        unitName: unitName,
-        venueCode: venue,
-        lecturerName: widget.user.name,
-        isLab: isLab,
-        generatedDate: DateTime.now().subtract(const Duration(days: 7)),
-        // Additional fields we'll add for the lecturer view
-        program: program,
+      // Extract unique units
+      _assignedUnits = _extractUniqueUnits(_allSessions);
+
+      setState(() {
+        _isLoading = false;
+      });
+
+  } catch (e) {
+      // Handle error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error loading timetable: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
-      
-      // Add to timetable
-      if (!timetable.containsKey(day)) {
-        timetable[day] = [];
-      }
-      timetable[day]!.add(session);
+      setState(() {
+        _isLoading = false;
+      });
     }
-
-    return timetable;
   }
 
+   // Organize timetable sessions by day
+  Map<String, List<TimetableSession>> _organizeTimetableSessions(List<TimetableSession> sessions) {
+    Map<String, List<TimetableSession>> organizedSessions = {};
+    
+    for (var session in sessions) {
+      if (!organizedSessions.containsKey(session.day)) {
+        organizedSessions[session.day] = [];
+      }
+      organizedSessions[session.day]!.add(session);
+    }
+    
+    return organizedSessions;
+  }
   // Extract all unique units from timetable
   List<String> _extractUniqueUnits(Map<String, List<TimetableSession>> timetable) {
     Set<String> units = {};
@@ -147,19 +98,15 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
 
   // Get the day name from weekday number
   String _getDayName(int weekday) {
-    // weekday: 1 = Monday, 2 = Tuesday, etc.
     if (weekday >= 1 && weekday <= 5) {
       return AppConstants.daysOfWeek[weekday - 1];
     }
-    return 'Monday'; // Default to Monday for weekends in our demo
+    return 'Monday'; // Default to Monday for weekends
   }
-  
-  // Get the next day that has classes scheduled
+   // Get the next day that has classes scheduled
   String _getNextDayWithClasses(String today) {
-    // Find today's index
     int todayIndex = AppConstants.daysOfWeek.indexOf(today);
     
-    // Check subsequent days
     for (int i = 1; i <= AppConstants.daysOfWeek.length; i++) {
       int nextIndex = (todayIndex + i) % AppConstants.daysOfWeek.length;
       String nextDay = AppConstants.daysOfWeek[nextIndex];
@@ -171,10 +118,12 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
       }
     }
     
-    // If no classes found, return next day anyway
+    // If no classes found, return next day
     int nextIndex = (todayIndex + 1) % AppConstants.daysOfWeek.length;
     return AppConstants.daysOfWeek[nextIndex];
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -184,17 +133,12 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () {
-              setState(() {
-                _isLoading = true;
-              });
-              _loadData();
-            },
+            onPressed: _loadLecturerTimetable,
             tooltip: 'Refresh',
           ),
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => _confirmLogout(),
+            onPressed: _confirmLogout,
             tooltip: 'Logout',
           ),
         ],
@@ -202,7 +146,7 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
-              onRefresh: _loadData,
+              onRefresh: _loadLecturerTimetable,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16),
@@ -295,7 +239,6 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
                     
                     const SizedBox(height: 24),
                     
-                    // Today's classes
                     const Text(
                       'Today\'s Classes',
                       style: TextStyle(
@@ -319,10 +262,10 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
                                   color: Colors.grey[400],
                                 ),
                                 const SizedBox(height: 16),
-                                Text(
+                                const Text(
                                   'No classes scheduled for today',
                                   style: TextStyle(
-                                    color: Colors.grey[600],
+                                    color: Colors.grey,
                                     fontSize: 16,
                                   ),
                                 ),
@@ -332,7 +275,7 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
                         ),
                       )
                     else
-                      ListView.builder(
+                     ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: _todaySessions.length,
@@ -347,9 +290,9 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        const Text(
                           'Upcoming Classes',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: MustTheme.primaryGreen,
@@ -454,7 +397,8 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
     );
   }
   
-  Widget _buildSessionCard(TimetableSession session, {bool showDay = false}) {
+ Widget _buildSessionCard(TimetableSession session, {bool showDay = false}) {
+    // Previous implementation remains the same
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
@@ -519,7 +463,7 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
                   ),
               ],
             ),
-            const SizedBox(height: 12),
+           const SizedBox(height: 12),
             Text(
               '${session.unitCode}: ${session.unitName}',
               style: const TextStyle(
@@ -630,9 +574,9 @@ class _LecturerDashboardState extends State<LecturerDashboard> {
               ],
             ),
             const SizedBox(height: 16),
-            TextField(
+            const TextField(
               maxLines: 3,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Issue Description',
                 hintText: 'Please describe the issue...',
                 border: OutlineInputBorder(),

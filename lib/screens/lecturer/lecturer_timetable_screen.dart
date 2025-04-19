@@ -1,9 +1,10 @@
+//lib/screens/lecturer/lecturer_timetable_screen.dart
 import 'package:flutter/material.dart';
 import '../../config/app_constants.dart';
 import '../../models/timetable_session.dart';
 import '../../models/user.dart';
+import '../../services/data_service.dart';
 import '../../theme/must_theme.dart';
-
 class LecturerTimetableScreen extends StatefulWidget {
   final User lecturer;
   final Map<String, List<TimetableSession>> timetable;
@@ -140,8 +141,8 @@ class _LecturerTimetableScreenState extends State<LecturerTimetableScreen> with 
           
           // Timetable content
           Expanded(
-            child: _viewMode == 'week' 
-                ? _buildWeekView() 
+            child: _viewMode == 'week'
+                ? _buildWeekView()
                 : TabBarView(
                     controller: _tabController,
                     children: AppConstants.daysOfWeek.map((day) {
@@ -309,7 +310,9 @@ class _LecturerTimetableScreenState extends State<LecturerTimetableScreen> with 
         children: [
           Row(
             children: [
-              const Icon(Icons.location_on, size: 14, color: Colors.grey),
+              const Icon(Icons.location_on,
+              size: 14, 
+              color: Colors.grey),
               const SizedBox(width: 4),
               Text(
                 session.venueCode,

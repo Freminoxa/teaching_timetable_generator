@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../models/lecturer.dart';
 import '../../../theme/must_theme.dart';
 
 class ManageLecturersScreen extends StatefulWidget {

@@ -265,9 +265,9 @@ class _StudentDashboardState extends State<StudentDashboard> {
                               ],
                             ),
                             const SizedBox(height: 16),
-                            Text(
+                            const Text(
                               'Current Session: ${AppConstants.currentSession}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

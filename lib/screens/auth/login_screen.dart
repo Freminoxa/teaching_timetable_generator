@@ -282,12 +282,12 @@ if (email == 'admin@must.ac.ke' && password == 'admin123') {
                     ),
                     child: Center(
                       child: Image.asset(
-                        'assets/images/logo.png',
+                        'assets/images/image.png',
                         width: 100,
                         height: 100,
                         // Fallback color if image isn't available
                         color: MustTheme.primaryGreen,
-                        errorBuilder: (context, error, stackTrace) => Icon(
+                        errorBuilder: (context, error, stackTrace) => const Icon(
                           Icons.school,
                           size: 64,
                           color: MustTheme.primaryGreen,

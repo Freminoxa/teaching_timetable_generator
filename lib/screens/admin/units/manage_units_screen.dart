@@ -376,8 +376,8 @@ class _ManageUnitsScreenState extends State<ManageUnitsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddUnitDialog,
-        child: const Icon(Icons.add),
         tooltip: 'Add New Unit',
+        child: const Icon(Icons.add),
       ),
       body: Column(
         children: [

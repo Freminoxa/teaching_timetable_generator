@@ -562,7 +562,7 @@ class _StudentTimetableScreenState extends State<StudentTimetableScreen> with Si
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Reminder set for ${session.unitCode} - ${reminderMinutes} minutes before class.'),
+                      content: Text('Reminder set for ${session.unitCode} - $reminderMinutes minutes before class.'),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );

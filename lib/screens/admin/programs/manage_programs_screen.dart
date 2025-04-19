@@ -1,3 +1,4 @@
+//lib/screens/admin/programs/manage_programs_screen.dart
 import 'package:flutter/material.dart';
 import '../../../theme/must_theme.dart';
 import '../../../models/program.dart';
@@ -319,8 +320,8 @@ class _ManageProgramsScreenState extends State<ManageProgramsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddProgramDialog,
-        child: const Icon(Icons.add),
         tooltip: 'Add New Program',
+        child: const Icon(Icons.add),
       ),
       body: Column(
         children: [
